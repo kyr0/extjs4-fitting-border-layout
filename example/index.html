@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Fitting Border Layout example</title>
+
+    <link href="../library/ext-4.1.2a/resources/css/ext-all.css" rel="stylesheet" type="text/css" />
+
+    <script src="../library/ext-4.1.2a/ext-all-debug-w-comments.js" type="text/javascript"></script>
+
+    <!-- Include layout -->
+    <script src="../src/Ext/ux/layout/container/FittingBorder.js" type="text/javascript"></script>
+</head>
+<body>
+
+    <h1>FittingBorder layout example</h1>
+
+    <div id="container">
+
+    </div>
+
+    <br /><br />
+
+    <div id="containerBorder">
+
+    </div>
+
+
+    <script type="text/javascript">
+
+        // Create panel
+        Ext.onReady(function() {
+
+            Ext.create('Ext.panel.Panel', {
+
+                renderTo: 'container',
+                layout: {
+                    type: 'fittingborder',
+
+                    // If noShrink is enabled, it grows but never shrinks again!
+                    noShrink: false
+                },
+
+
+                title: 'A growing border layout',
+
+                height: 100,
+                width: 500,
+
+                items: [{
+                    id: 'centerRegion',
+                    region: 'center'
+                }, {
+                    region: 'north',
+                    xtype: 'toolbar',
+                    items: [{
+                        text: 'Add item to center',
+                        handler: function() {
+
+                            // Add the item to grow the center
+                            Ext.getCmp('centerRegion').add({
+                                xtype: 'label',
+                                text: 'Happy placeholder!'
+                            });
+                        }
+                    }, {
+                        text: 'Remove item from center',
+                        handler: function() {
+
+                            var firstChild = Ext.getCmp('centerRegion').getComponent(0);
+
+                            if (firstChild) {
+
+                                // Remove an item to  the center
+                                Ext.getCmp('centerRegion').remove(firstChild);
+                            }
+                        }
+                    }]
+                }]
+            });
+
+
+
+        Ext.create('Ext.panel.Panel', {
+
+            renderTo: 'containerBorder',
+            layout: {
+                type: 'border'
+            },
+
+
+            title: 'Good old border layout',
+
+            height: 100,
+            width: 500,
+
+            items: [{
+                id: 'centerRegionBorder',
+                region: 'center',
+                autoScroll: true
+            }, {
+                region: 'north',
+                xtype: 'toolbar',
+                items: [{
+                    text: 'Add item to center',
+                    handler: function() {
+
+                        // Add the item to grow the center
+                        Ext.getCmp('centerRegionBorder').add({
+                            xtype: 'label',
+                            text: 'Happy placeholder!'
+                        });
+                    }
+                }, {
+                    text: 'Remove item from center',
+                    handler: function() {
+
+                        var firstChild = Ext.getCmp('centerRegionBorder').getComponent(0);
+
+                        if (firstChild) {
+
+                            // Remove an item to  the center
+                            Ext.getCmp('centerRegionBorder').remove(firstChild);
+                        }
+                    }
+                }]
+            }]
+        });
+    });
+
+    </script>
+
+</body>
+</html>
