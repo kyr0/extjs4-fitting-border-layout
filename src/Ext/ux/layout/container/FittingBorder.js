@@ -2,7 +2,7 @@
  * @class Ext.ux.layout.container.FittingBorder
  * @extend Ext.layout.container.Border
  * @author Aron Homberg <info@aron-homberg.de>
- * @license WTFPL License, see: license.txt
+ * @license WTFNPL License, see: license.txt
  *
  * A border layout that just grows it's owner containers
  * height in all cases the center region would display a scroll bar.
