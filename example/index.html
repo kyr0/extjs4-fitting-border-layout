@@ -30,102 +30,68 @@
         // Create panel
         Ext.onReady(function() {
 
+            var onAddItemClick = function(btn) {
+                btn.ownerCt.add({
+                    xtype: 'label',
+                    text: 'Happy placeholder!'
+                });
+            }, onRemoveItemClick = function(btn) {
+
+                var lastItemCnt = btn.ownerCt.items.items.length-1;
+                if (btn.ownerCt.getComponent(lastItemCnt) && lastItemCnt > 1) {
+                    btn.ownerCt.remove(btn.ownerCt.getComponent(lastItemCnt));
+                }
+            }, buildItems = function() {
+                return [{
+                    xtype: 'button',
+                    text: 'Add item here',
+                    handler: onAddItemClick
+                }, {
+                    xtype: 'button',
+                    text: 'Remove item here',
+                    handler: onRemoveItemClick
+                }];
+            };
+
             Ext.create('Ext.panel.Panel', {
 
                 renderTo: 'container',
                 layout: {
                     type: 'fittingborder',
 
-                    // If noShrink is enabled, it grows but never shrinks again!
+                    // If enabled, the center, west and east regions grow but never shrink
                     noShrink: false
                 },
 
 
                 title: 'A growing border layout',
 
-                height: 100,
+                height: 300,
                 width: 500,
 
                 items: [{
-                    id: 'centerRegion',
-                    region: 'center'
+                    region: 'center',
+                    items: buildItems()
                 }, {
+                    region: 'west',
+                    layout: 'vbox',
+                    items: buildItems()
+                }, {
+                    region: 'east',
+                    layout: 'vbox',
+                    items: buildItems()
+                }, {
+                    region: 'south',
+                    layout: 'vbox',
+                    items: buildItems()
+                }, {
+                    xtype: 'panel',
                     region: 'north',
-                    xtype: 'toolbar',
-                    items: [{
-                        text: 'Add item to center',
-                        handler: function() {
-
-                            // Add the item to grow the center
-                            Ext.getCmp('centerRegion').add({
-                                xtype: 'label',
-                                text: 'Happy placeholder!'
-                            });
-                        }
-                    }, {
-                        text: 'Remove item from center',
-                        handler: function() {
-
-                            var firstChild = Ext.getCmp('centerRegion').getComponent(0);
-
-                            if (firstChild) {
-
-                                // Remove an item to  the center
-                                Ext.getCmp('centerRegion').remove(firstChild);
-                            }
-                        }
-                    }]
+                    layout: 'vbox',
+                    items: buildItems()
                 }]
             });
-
-
-
-        Ext.create('Ext.panel.Panel', {
-
-            renderTo: 'containerBorder',
-            layout: {
-                type: 'border'
-            },
-
-
-            title: 'Good old border layout',
-
-            height: 100,
-            width: 500,
-
-            items: [{
-                id: 'centerRegionBorder',
-                region: 'center',
-                autoScroll: true
-            }, {
-                region: 'north',
-                xtype: 'toolbar',
-                items: [{
-                    text: 'Add item to center',
-                    handler: function() {
-
-                        // Add the item to grow the center
-                        Ext.getCmp('centerRegionBorder').add({
-                            xtype: 'label',
-                            text: 'Happy placeholder!'
-                        });
-                    }
-                }, {
-                    text: 'Remove item from center',
-                    handler: function() {
-
-                        var firstChild = Ext.getCmp('centerRegionBorder').getComponent(0);
-
-                        if (firstChild) {
-
-                            // Remove an item to  the center
-                            Ext.getCmp('centerRegionBorder').remove(firstChild);
-                        }
-                    }
-                }]
-            }]
         });
-    });
 
     </script>
 

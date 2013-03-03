@@ -9,8 +9,6 @@
  *
  *     layout: {
             type: 'fittingborder',
-
-            // If noShrink is enabled, it grows but never shrinks again!
             noShrink: false
        },
  */
@@ -19,7 +17,7 @@ Ext.define('Ext.ux.layout.container.FittingBorder', {
     alias: 'layout.fittingborder',
 
     /**
-     * @cfg {Boolean} noShrink If enabled, the center region grows but never shrinks back
+     * @cfg {Boolean} noShrink If enabled, the center, west and east regions grow but never shrink
      */
     noShrink: false,
 
@@ -40,7 +38,7 @@ Ext.define('Ext.ux.layout.container.FittingBorder', {
                 me.centerRegion.body &&
                 me.centerRegion.body.dom) {
 
-                me.listenToCenterRelayout();
+                me.maintainOwnerRelayout();
 
                 clearTimeout(waitForCenter);
             }
@@ -48,42 +46,98 @@ Ext.define('Ext.ux.layout.container.FittingBorder', {
         }, 50);
     },
 
-    listenToCenterRelayout: function() {
+    maintainOwnerRelayout: function() {
 
         var me = this,
-            lastScrollHeight = me.centerRegion.body.dom.scrollHeight;
+            layoutItems = me.getLayoutItems(),
+            layoutItemsCnt = layoutItems.length,
+            ownerDockedItems = me.owner.getDockedItems(),
+            regionHeightGaps = {}, i,
+            fullHeight = 0, fullRegionHeight = 0,
+            regionName, lastMaxMiddleHeight = 0,
+            dockedItemsHeightGap = 0,
+            maintainHeight = function() {
 
-        me.centerRegion.on('afterlayout', function(centerRegion) {
+                fullHeight = 0;
 
-            if (centerRegion && centerRegion.body && centerRegion.body.dom) {
+                for (i=0; i<layoutItemsCnt; i++) {
 
-                if (lastScrollHeight !== centerRegion.body.dom.scrollHeight) {
+                    if (layoutItems[i].region) {
 
-                    // Cache last scroll height change
-                    lastScrollHeight = centerRegion.body.dom.scrollHeight;
+                        regionName = layoutItems[i].region;
 
-                    me.fitToCenter(centerRegion.body.dom.scrollHeight);
+                        fullRegionHeight =
+                            me.getFullScrollHeight(layoutItems[i]) + regionHeightGaps[regionName];
+
+                        //console.log( regionName + ': ' + fullRegionHeight);
+
+                        if (regionName.toLowerCase() === 'north' ||
+                            regionName.toLowerCase() === 'south') {
+                            fullHeight += fullRegionHeight;
+                        } else {
+                            if (fullRegionHeight > lastMaxMiddleHeight) {
+                                lastMaxMiddleHeight = fullRegionHeight;
+                            }
+                        }
+                    }
                 }
+                fullHeight += lastMaxMiddleHeight;
+                fullHeight += dockedItemsHeightGap;
+
+                //console.log('Maintained new owner height:' + fullHeight + ' ? ' + me.owner.getHeight());
+
+                if (me.noShrink && (fullHeight > me.owner.getHeight())) {
+
+                    me.owner.setHeight(fullHeight);
+
+                } else if (fullHeight !== me.owner.getHeight()) {
+
+                    me.owner.setHeight(fullHeight);
+                }
+           };
+
+        // Calculate height gaps between different calc models initially
+        for (i=0; i<layoutItemsCnt; i++) {
+
+            if (layoutItems[i].region) {
+
+                regionHeightGaps[layoutItems[i].region] =
+                    layoutItems[i].getHeight() - me.getFullScrollHeight(layoutItems[i]);
             }
-        });
+        }
+
+        // Calculate height gap of docked items
+        for (i=0; i<ownerDockedItems.length; i++) {
+
+            if (ownerDockedItems[i].dock &&
+                (ownerDockedItems[i].dock === 'top' || ownerDockedItems[i].dock === 'bottom')
+            ) {
+                dockedItemsHeightGap += ownerDockedItems[i].getHeight();
+            }
+        }
+
+        // On center or owner container re-layout, maintain height
+        me.owner.on('afterlayout', maintainHeight);
+        me.centerRegion.on('afterlayout', maintainHeight);
     },
 
-    fitToCenter: function(centerRegionRealHeight) {
+    getFullScrollHeight: function(cmp) {
 
-        var me = this,
-            centerHeightGap = centerRegionRealHeight - me.centerRegion.getHeight(),
-            fitOwnerHeight = function(heightGap) {
-                me.owner.setHeight(
-                    me.owner.getHeight() + heightGap
-                );
-            };
+        var scrollHeight = 0,
+            firstCmpChild;
 
-        if (me.noShrink) {
-            if (centerHeightGap > 0) {
-                fitOwnerHeight(centerHeightGap);
-            }
-        } else {
-            fitOwnerHeight(centerHeightGap);
+        if (cmp && cmp.body && cmp.body.dom) {
+            scrollHeight = cmp.body.dom.scrollHeight;
         }
+
+        firstCmpChild = cmp.body.first();
+
+        if (firstCmpChild && firstCmpChild.dom) {
+
+            if (firstCmpChild.dom.scrollHeight > scrollHeight) {
+                scrollHeight = firstCmpChild.dom.scrollHeight;
+            }
+        }
+        return scrollHeight;
     }
 });
